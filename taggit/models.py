@@ -2,8 +2,23 @@ import django
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes.generic import GenericForeignKey
 from django.db import models, IntegrityError, transaction
-from django.template.defaultfilters import slugify as default_slugify
 from django.utils.translation import ugettext_lazy as _, ugettext
+
+
+try:
+    from unidecode import unidecode
+    import re
+    
+    def default_slugify(value):
+        """
+        Normalizes string, converts to lowercase, removes non-alpha characters,
+        and converts spaces to hyphens.
+        """
+        value = unidecode(value)
+        value = unicode(re.sub('[^\w\s-]', '', value).strip().lower())
+        return re.sub('[-\s]+', '-', value)
+except ImportError:
+    from django.template.defaultfilters import slugify as default_slugify
 
 
 class TagBase(models.Model):
